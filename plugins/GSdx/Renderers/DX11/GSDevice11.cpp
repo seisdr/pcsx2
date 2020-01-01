@@ -129,8 +129,6 @@ bool GSDevice11::SetFeatureLevel(D3D_FEATURE_LEVEL level, bool compat_mode)
 
 bool GSDevice11::Create(const std::shared_ptr<GSWnd> &wnd)
 {
-	bool nvidia_vendor = false;
-
 	if(!__super::Create(wnd))
 	{
 		return false;
@@ -168,8 +166,22 @@ bool GSDevice11::Create(const std::shared_ptr<GSWnd> &wnd)
 				hr = enum_adapter->GetDesc1(&desc);
 				if (S_OK == hr && (GSAdapter(desc) == adapter_id || adapter_id == "default"))
 				{
-					if (desc.VendorId == 0x10DE)
-						nvidia_vendor = true;
+					// D3D GPU vendor check.
+					switch (desc.VendorId)
+					{
+						case 0x10DE:
+							m_gpu_vendor = GPU_VENDOR::NVIDIA;
+							break;
+						case 0x1002:
+							m_gpu_vendor = GPU_VENDOR::AMD;
+							break;
+						case 0x8086:
+							m_gpu_vendor = GPU_VENDOR::INTEL;
+							break;
+						default:
+							m_gpu_vendor = GPU_VENDOR::UNKNOWN;
+							break;
+					}
 
 					adapter = enum_adapter;
 					driver_type = D3D_DRIVER_TYPE_UNKNOWN;
@@ -234,8 +246,8 @@ bool GSDevice11::Create(const std::shared_ptr<GSWnd> &wnd)
 
 	{	// HACK: check nVIDIA
 		// Note: It can cause issues on several games such as SOTC, Fatal Frame, plus it adds border offset.
-		bool disable_safe_features = theApp.GetConfigB("UserHacks") && theApp.GetConfigB("UserHacks_Disable_Safe_Features");
-		m_hack_topleft_offset = (m_upscale_multiplier != 1 && nvidia_vendor && !disable_safe_features) ? -0.01f : 0.0f;
+		const bool disable_safe_features = theApp.GetConfigB("UserHacks") && theApp.GetConfigB("UserHacks_Disable_Safe_Features");
+		m_hack_topleft_offset = (m_upscale_multiplier != 1 && m_gpu_vendor == GPU_VENDOR::NVIDIA && !disable_safe_features) ? -0.01f : 0.0f;
 	}
 
 	// debug

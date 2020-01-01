@@ -182,6 +182,14 @@ public:
 
 	enum {Windowed, Fullscreen, DontCare};
 
+	enum class GPU_VENDOR : uint8_t
+	{
+		UNKNOWN,
+		NVIDIA,
+		AMD,
+		INTEL
+	} m_gpu_vendor;
+
 	virtual bool Create(const std::shared_ptr<GSWnd> &wnd);
 	virtual bool Reset(int w, int h);
 	virtual bool IsLost(bool update = false) {return false;}
