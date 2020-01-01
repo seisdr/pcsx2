@@ -754,7 +754,7 @@ void GSRendererDX11::EmulateTextureSampler(const GSTextureCache::Source* tex)
 
 	m_ps_sel.ltf = bilinear && shader_emulated_sampler;
 
-	m_ps_sel.point_sampler = !bilinear || shader_emulated_sampler;
+	m_ps_sel.point_sampler = m_dev->m_gpu_vendor == GSDevice::GPU_VENDOR::AMD && (!bilinear || shader_emulated_sampler);
 
 	GSVector4 TextureScale = GSVector4(0.0625f) / WH.xyxy();
 	vs_cb.Texture_Scale_Offset.x = TextureScale.x;
